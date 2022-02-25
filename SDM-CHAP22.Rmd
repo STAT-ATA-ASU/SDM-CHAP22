@@ -1,0 +1,261 @@
+---
+title: "Chapter 22"
+author: "Alan T. Arnholt - Modified notes from the Second Edition of _Probability and Statistics with R_"
+date: 'Last compiled: `r format(Sys.time(), "%B %d, %Y at %X")`'
+output: bookdown::html_document2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA, warning = FALSE, message = FALSE, fig.align = "center")
+library(tidyverse)
+library(janitor)
+```
+
+# Comparing Counts
+
+**Objectives:**
+
+I.    Goodness of fit test
+
+II.   Homogeneity test
+
+III.  Independence test
+
+IV.   What can go wrong?
+
+________________
+
+
+Many statistical procedures require knowledge of the population from which the sample is taken. For example,  using Student's $t$-distribution for testing a hypothesis or constructing a confidence interval for $\mu$ assumes that the parent population is normal. In this section, **goodness-of-fit** (GOF) procedures are presented that will help to identify the distribution of the population from which the sample is drawn. The null hypothesis in a goodness-of-fit test is a statement about the form of the cumulative distribution.  When all the parameters in the null hypothesis are specified, the hypothesis is called simple. Recall that in the event the null hypothesis does not completely specify all of the parameters of the distribution, the hypothesis is said to be composite. Goodness-of-fit tests are typically used when the form of the population is in question.  In contrast to most of the statistical procedures discussed so far, where the goal has been to reject the null hypothesis, in a GOF test one hopes to retain the null hypothesis. 
+
+## The Chi-Square Goodness-of-Fit Test
+
+Given a single random sample of size $n$ from an unknown population $F_X$, one may wish to test the hypothesis that $F_X$ has some known distribution $F_0(x)$ for all $x$.  For example, using the data frame `SOCCER` from the `PASWR2` package, is it reasonable to assume the number of goals scored during regulation time for the 232 soccer matches has a Poisson distribution with $\lambda=2.5$?
+
+The chi-square goodness-of-fit test is based on a normalized statistic that examines the vertical deviations between what is observed and what is expected when $H_0$ is true in $k$ mutually exclusive categories. At times, such as in surveys of brand preferences, where the categories/groups would be the brand names, the sample will lend itself to being divided into $k$ mutually exclusive categories. Other times, the categories/groupings will be more arbitrary. Before applying the chi-square goodness-of-fit test, the data must be grouped according to some scheme to form $k$ mutually exclusive categories.  When the null hypothesis completely specifies the population, the probability that a random observation will fall into each of the chosen or fixed categories can be computed. Once the probabilities for a data point to fall into each of the chosen or fixed categories is computed, multiplying the probabilities by $n$ produces the expected counts for each category under the null distribution.  If the null hypothesis is true, the differences between the counts observed in the $k$ categories and the counts expected in the $k$ categories should be small.  The test criterion for testing $H_0: F_X(x) = F_0(x) \text{ for all } x$ against the alternative $H_1: F_X(x) \ne F_0(x)  \text{ for some } x$ when the null hypothesis is completely specified is
+
+\begin{equation}
+\chi_{\text{obs}}^2=\sum_{i=1}^{k} \frac{(O_k - E_k)^2}{E_k},
+(\#eq:chiobs)
+\end{equation}
+
+where $\chi_\text{obs}^2$ is the sum of the squared deviations between what is observed $(O_k)$ and what is expected $(E_k)$ in each of the $k$ categories divided by what is expected in each of the $k$ categories.  Large values of $\chi_\text{obs}^2$ occur when the observed data are inconsistent with the null hypothesis and thus lead to rejection of the null hypothesis. The exact distribution of $\chi_\text{obs}^2$ is very complicated; however, for large $n$, provided all expected categories are at least 5, $\chi_\text{obs}^2$ is distributed approximately $\chi^2$ with $k-1$ degrees of freedom. When the null hypothesis is composite, that is, not all of the parameters are specified, the degrees of freedom for the random variable  $\chi_\text{obs}^2$ are reduced by one for each parameter that must be estimated.
+
+____________
+
+### Example{-}
+
+Test the hypothesis that the number of goals scored during regulation time for the 232 soccer matches stored in the data frame `SOCCER` has a Poisson **cdf** with $\lambda=2.5$ with the chi-square goodness-of-fit test and an $\alpha$ level of 0.05. Produce a histogram showing the number of observed goals scored during regulation time and superimpose on the histogram the number of goals that are expected to be made when the distribution of goals follows a Poisson distribution with $\lambda=2.5$.
+
+### Solution{-}
+
+Since the number of categories for a Poisson distribution is
+theoretically infinite, a table is first constructed of the observed
+number of goals to get an idea of reasonable categories.
+
+```{r}
+library(PASWR2)
+xtabs(~goals, data = SOCCER)
+```
+
+Based on the table, a decision is made to create categories for 0, 1, 2, 3, 4, 5, and 6 or more goals.  Under the null hypothesis that $F_0(x)$ is a Poisson distribution with $\lambda=2.5$, the probabilities of scoring 0, 1, 2, 3, 4, 5, and 6 or more goals are computed with `R` as follows:
+
+```{r}
+PX <- c(dpois(0:5, 2.5), ppois(5, 2.5, lower = FALSE))
+PX
+```
+
+Since there were a total of $n=232$ soccer games, the expected number of goals for the six categories is simply $232 \times \tt{PX}$.
+
+```{r}
+EX <- 232*PX
+OB <- c(as.vector(xtabs(~goals, data = SOCCER)[1:6]), 
+        sum(xtabs(~goals, data = SOCCER)[7:9]))
+OB
+ans <- cbind(PX, EX, OB)
+row.names(ans) <- c(" X=0"," X=1"," X=2"," X=3"," X=4"," X=5","X>=6")
+ans
+```
+
+**Hypotheses**--- The null and alternative hypotheses for using the chi-square goodness-of-fit test to test the hypothesis that the number of goals scored during regulation time for the 232 soccer matches stored in the data frame `SOCCER` has a Poisson **cdf** with $\lambda=2.5$ are
+
+\begin{align*}
+        H_0&: F_X(x) = F_0(x) \sim \text{Pois}(\lambda=2.5)\text{ for all } x \text{ versus
+        }\\
+        H_A&:  F_X(x) \ne F_0(x) \text{ for some } x.
+\end{align*}
+
+**Test Statistic:**--- The test statistic chose is $\chi_{\text{obs}}^2.$
+
+**Rejection Region Calculations**---Reject if $\chi^2_{\text{obs}}>\chi^2_{1-\alpha;k-1}$.  The $\chi^2_{\text{obs}}$ is computed with \@ref(eq:chiobs) in `R` below.
+
+```{r}
+chi_obs <- sum((OB - EX)^2/EX)
+chi_obs
+```
+
+$`r chi_obs`= \chi^2_{\text{obs}}\overset{?}{>}\chi^2_{0.95;6}=`r qchisq(0.95, 6)`$.
+
+**Statistical Conclusion**---The $p-$value is $`r pchisq(chi_obs, 6, lower = FALSE)`$.
+
+```{r}
+p_val <- pchisq(chi_obs, 7-1, lower = FALSE)
+p_val
+```
+I.  Since $\chi^2_{\text{obs}}=`r chi_obs`$ is not greater than $\chi^2_{0.95;6}=`r qchisq(0.95, 6)`$, fail to reject $H_0$.
+
+II. Since the $p-$value = $`r p_val`$ is greater than 0.05, fail to reject $H_0$.
+
+Fail to reject $H_0$.
+
+**English Conclusion**---There is no evidence to suggest that the true **cdf** does not equal the Poisson distribution with $\lambda=2.5$ for at least one $x$.
+
+____________
+
+To perform a goodness-of-fit test with the function `chisq.test()`, one may  specify a vector of observed values for the argument `x=`, and a vector of probabilities of the same length as the vector passed to `x=` to the argument `p=`.
+
+```{r}
+chisq.test(x = OB, p = PX)
+```
+
+The code below uses base graphics to create a  histogram with superimposed expected goals and the result is shown in Figure \@ref(fig:histo).
+
+```{r, label = "histo", fig.cap = "Histogram of observed goals for `SOCCER` with a superimposed Poisson distribution with lambda = 2.5 (vertical lines)"}
+hist(SOCCER$goals, breaks = c((-0.5 + 0):(8 + 0.5)), col = "lightblue", 
+     xlab = "Goals scored", ylab = "", freq = TRUE, main = "")
+x <- 0:8
+fx <- (dpois(0:8, lambda = 2.5))*232
+lines(x, fx, type = "h")
+lines(x, fx, type = "p", pch = 16)
+```
+
+_________________
+
+Although the chi-square goodness-of-fit test is primarily designed for discrete distributions, it can also be used with a continuous distribution if appropriate categories are defined.
+
+____________
+
+### Example{-}
+
+Use the chi-square goodness-of-fit test with $\alpha=0.05$ to test the hypothesis that the SAT scores stored in the data frame `GRADES` have a normal **cdf**.  Use categories $(-\infty, \mu-2\sigma]$, $(\mu-2\sigma, \mu-\sigma]$, $(\mu-\sigma, \mu]$, $(\mu, \mu+\sigma]$,  $(\mu+\sigma, \mu+2\sigma]$, and $(\mu+2\sigma, \infty]$.  Produce a histogram using the categories specified and superimpose on the histogram the expected number of SAT scores in each category when $F_0(x)\sim N(\mu=\bar{x}, \sigma=s)$.
+
+____________
+
+### Solution{-}
+
+**Hypotheses**---The null and alternative hypotheses for using the chi-square goodness-of-fit test to test the hypothesis that the SAT scores stored in the data frame `GRADES` have a Normal **cdf** are
+
+\begin{align*}
+        H_0&: F_X(x) = F_0(x) \sim N(\mu=\bar{x},\, \sigma=s)\text{ for all } x \text{ versus
+        }\\
+        H_A&:  F_X(x) \ne F_0(x)\text{ for some } x.
+\end{align*}
+
+**Test Statistic**---Since the mean and standard deviation are unknown, the first step is to estimate the unknown parameters $\mu$ and $\sigma$ using $\bar{x}=`r mean(GRADES$sat)`$ and  $s=`r sd(GRADES$sat)`$.
+        
+```{r}
+mu <- mean(GRADES$sat)
+sig <- sd(GRADES$sat) 
+c(mu, sig)
+```
+        
+Because a normal distribution is continuous, it is necessary to create categories that include all the data.  The categories $\mu - 3\sigma$  to $\mu -2\sigma, \dots, \mu +2\sigma$  to $\mu + 3\sigma$ are `r mu - 3*sig` to `r mu - 2*sig`, `r mu - 2*sig` to  `r mu - 1*sig`, `r mu - 1*sig` to `r mu`, 
+`r mu` to
+`r mu + sig`, `r mu + sig` to `r mu + 2*sig`, and `r mu + 2*sig` to `r mu + 3*sig`.   These particular categories include all of the observed SAT scores;  however, the probabilities actually computed for the largest and smallest categories will be all of the area to the right and left, respectively, of $\bar{x} \pm 2s$.  This is done so that the total area under the distribution in the null hypothesis is one.
+
+```{r}
+bin <- seq(from = mu - 3*sig, to = mu + 3*sig, by = sig)
+round(bin, 0)                     # vector of bin cut points
+T1 <- table(cut(GRADES$sat, breaks = bin))
+T1                                # count of observations in bins
+OB <- as.vector(T1)
+OB                                # vector of observations
+PR <- c(pnorm(-2), pnorm(-1:2) - pnorm(-2:1), 
+        pnorm(2, lower = FALSE))  # area under curve
+EX <- 200*PR                      # Expected count in bins
+ans <- cbind(PR, EX, OB)          # column bind values in ans
+ans
+```
+
+
+
+**Rejection Region Calculations**---Reject if $\chi^2_{\text{obs}}>\chi^2_{1-\alpha;k-p-1}$.  Now that the expected and observed counts for each of the categories are computed, the $\chi_{\text{obs}}^2$ value can be computed according to \@ref(eq:chiobs) and is `r chisq.test(x = OB, p = PR)$stat`.
+
+```{r}
+chi_obs <- sum((OB - EX)^2/EX)
+chi_obs
+```
+
+**Statistical Conclusion**---In this problem, two parameters were estimated, and as a consequence, the degrees of freedom are computed as $6-2-1=3$. The $p-$value is `r pchisq(chi_obs, 3, lower = FALSE)`.
+
+```{r}
+p_val <- pchisq(chi_obs, 6 - 2 - 1, lower = FALSE)
+p_val
+```
+
+I.    Since $\chi^2_{\text{obs}}=`r chisq.test(x = OB, p = PR)$stat`$ is not greater than $\chi^2_{0.95;3}=`r qchisq(0.95, 3)`$, fail to reject $H_0$.
+
+II.   Since the $p-$value = `r p_val` is greater than 0.05, fail to reject $H_0$.
+
+**Fail to reject $H_0$**
+
+**English Conclusion**---There is no evidence to suggest that the true **cdf** of SAT scores is not a normal distribution.
+
+_____________
+
+**Caution:**If one uses the `R` function `chisq.test()`, the degrees of
+freedom and the subsequent $p-$value will be incorrect, as illustrated
+below.
+
+```{r}
+chisq.test(x = OB, p = PR)  # returns incorrect dof and p-value
+```
+
+Since it is not feasible to produce a histogram that extends from $-\infty$ to $\infty$, a histogram is created where the categories will simply cover the range of observed values.\IE{hist}  In this problem, the range of the SAT scores is `r range(GRADES$sat)[1]` to `r range(GRADES$sat)[2]`.  The histogram with categories $(\mu-3\sigma, \mu-2\sigma]$, $(\mu-2\sigma, \mu-\sigma]$, $(\mu-\sigma, \mu]$, $(\mu+, \mu+\sigma]$,  $(\mu+\sigma, \mu+2\sigma]$, and $(\mu+2\sigma, \mu+3\sigma]$, superimposed with the expected number of SAT scores for the categories $(-\infty, \mu-2\sigma]$, $(\mu-2\sigma, \mu-\sigma]$, $(\mu-\sigma, \mu]$, $(\mu, \mu+\sigma]$, $(\mu+\sigma, \mu+2\sigma]$, and $(\mu+2\sigma, \infty]$ is computed below and depicted in Figure \@ref(fig:normsat).
+
+```{r, label = "normsat", fig.cap = "Histogram of SAT scores in `Grades`"}
+hist(GRADES$sat, breaks = bin, col = "lightblue", 
+     xlab = "SAT scores", ylab="", freq = TRUE, main = "")
+x <- bin[2:7] - sig/2
+fx <- PR*200
+lines(x, fx, type = "h")
+lines(x, fx, type = "p", pch = 16)
+```
+
+____________
+
+**Your Turn**
+
+A psychology professor reports that historically grades in her intro class have been distributed
+15% A, 30% B, 40% C, 10% D, and 5% F. Grades this year were distributed:
+
+```{r, echo = FALSE}
+OB <- c(89, 121, 78, 25, 12)
+names(OB) <- LETTERS[1:5]
+OB
+```
+
+Is there evidence that this year’s distribution is different from the historical distribution? If yes, which grade impacted that decision most?
+
+```{r}
+# Your Code Here
+OB <- c(89, 121, 78, 25, 12)
+names(OB) <- LETTERS[1:5]
+OB
+EX <- sum(OB)*c(0.15, 0.3, 0.4, 0.1, 0.05)
+SS <- (OB - EX)^2/EX
+SS
+# Largest component is A's
+chi_obs <- sum(SS)
+p_val <- pchisq(chi_obs, 4, lower = FALSE)
+p_val
+chisq.test(x = OB, p = c(0.15, 0.3, 0.4, 0.1, 0.05))
+```
+
+____________
+
+Hints for police vs. youth problem (#11): First, make sure the police percents add to 100%. Next, use the only sample size given times observed (police) and expected (youth) percents to get counts (OBS & EXP, respectively). Finally, this is a test of goodness of fit.
+
+__________
+
+
