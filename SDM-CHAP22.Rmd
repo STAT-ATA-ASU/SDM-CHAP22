@@ -17,9 +17,9 @@ library(janitor)
 
 I.    Goodness of fit test
 
-II.   Homogeneity test
+II.   Independence test
 
-III.  Independence test
+III.  Homogeneity test
 
 IV.   What can go wrong?
 
@@ -159,7 +159,7 @@ sig <- sd(GRADES$sat)
 c(mu, sig)
 ```
         
-Because a normal distribution is continuous, it is necessary to create categories that include all the data.  The categories $\mu - 3\sigma$  to $\mu -2\sigma, \dots, \mu +2\sigma$  to $\mu + 3\sigma$ are `r mu - 3*sig` to `r mu - 2*sig`, `r mu - 2*sig` to  `r mu - 1*sig`, `r mu - 1*sig` to `r mu`, 
+Because a normal distribution is continuous, it is necessary to create categories that include all the data.  The categories $\mu - 3\sigma$  to $\mu -2\sigma, \bullets, \mu +2\sigma$  to $\mu + 3\sigma$ are `r mu - 3*sig` to `r mu - 2*sig`, `r mu - 2*sig` to  `r mu - 1*sig`, `r mu - 1*sig` to `r mu`, 
 `r mu` to
 `r mu + sig`, `r mu + sig` to `r mu + 2*sig`, and `r mu + 2*sig` to `r mu + 3*sig`.   These particular categories include all of the observed SAT scores;  however, the probabilities actually computed for the largest and smallest categories will be all of the area to the right and left, respectively, of $\bar{x} \pm 2s$.  This is done so that the total area under the distribution in the null hypothesis is one.
 
@@ -254,8 +254,156 @@ chisq.test(x = OB, p = c(0.15, 0.3, 0.4, 0.1, 0.05))
 
 ____________
 
-Hints for police vs. youth problem (#11): First, make sure the police percents add to 100%. Next, use the only sample size given times observed (police) and expected (youth) percents to get counts (OBS & EXP, respectively). Finally, this is a test of goodness of fit.
+Given a contingency table (Question 5)
+
+```{r}
+ad <- c(20, 45, 35, 25, 50, 25)
+adm <- matrix(ad, byrow = TRUE, nrow = 2)
+adm
+dimnames(adm) <- list(Branch = c("In-Town", "Mall"), Age = c("Less Than 30", "30-55", "56 or older"))
+adm
+chisq.test(adm)
+# To get the expected counts use $exp
+chisq.test(adm)$exp
+```
+
+To get **Standardized Residuals** compute $\frac{(\text{Obs - Exp})}{\sqrt{\text{Exp}}}$.  If using the `chisq.test()` function one may extract the residuals using `$residuals` 
+
+```{r}
+chisq.test(adm)$residuals
+# Equivalent to
+(chisq.test(adm)$obs - chisq.test(adm)$exp)/chisq.test(adm)$exp^.5
+```
+
+
+**Questions 8**
+
+Given a ratio 9:3:3:1, the fraction for each category will be 9/16, 3/16, 3/16, 1/16. 
+
+```{r}
+obs <- c(54, 21, 13, 12)
+obs2 <- obs*2
+p <- c(9/16, 3/16, 3/16, 1/16)
+chisq.test(x = obs, p = p)
+chisq.test(obs2, p = p)
+```
 
 __________
+
+## Independence test
+
+**SCENARIO ONE:**  Is there an association between gender and a person's happiness? To investigate whether happiness depends on gender, one might use information collected from the General Social Survey (GSS) [http://sda.berkeley.edu/GSS](http://sda.berkeley.edu/GSS). In each survey, the GSS asks, ``Taken all together, how would you say things are these days --- would you say that you are very happy, pretty happy, or not too happy?'' Respondents to each survey are coded as either male or female. The information below shows how a subset of respondents (26-year-olds) were classified with respect to the variables HAPPY and SEX.
+
+```{r}
+HA <- c(110, 277, 50, 163, 302, 63)
+HAT <- matrix(data = HA, nrow = 2, byrow = TRUE)
+dimnames(HAT) <- list(SEX = c("Male", "Female"),
+    Category = c("Very Happy", "Pretty Happy", "Not To Happy"))
+HAT
+```
+
+Scenario one asks if there is an association between gender and a person's happiness.  Two events, $A$ and $B$, were defined as independent when $P(A \cap B)=P(A)\times P(B)$ or, equivalently, when $P(A|B)=P(A)$. If, instead of having a random sample from a single population, an $I \times J$ contingency table consisted of entries from the population, association could be mathematically verified by showing that $P(n_{ij}) \ne P(n_{i\bullet}) \times P(n_{\bullet j})$ for some $i$ and $j$. If by chance $P(n_{ij}) = P(n_{i\bullet}) \times P(n_{\bullet j})$  for all $i$ and $j$, then one would conclude there is no association between gender and a person's happiness.  That is, the variables gender and happiness would be considered mathematically independent. Since the entire population is not given but rather a sample from a population, the values in the $I \times J$ contingency table can be expected to change from sample to sample. The question is, ``By how much can the variables deviate from the mathematical definition of independence and still be considered statistically independent?''
+
+The null and alternative hypotheses to test for independence between row and column variables is written $H_0: \pi_{ij}=\pi_{i\bullet}\pi_{\bullet j}$ versus $H_A:\pi_{ij} \ne \pi_{i\bullet}\pi_{\bullet j}$. The  test statistic is
+
+\begin{equation}
+\chi_{\text{obs}}^2 =\sum_{i=1}^I\sum_{j=1}^J \frac{(O_{ij} - E_{ij})^2}{E_{ij}}
+(\#eq:ChiSqStatIndep)
+\end{equation}
+
+It compares the observed frequencies in the table with the expected frequencies when $H_0$ is true. Under the assumption of independence, and when the observations in the cells are sufficiently large (usually greater than 5), $\chi_{\text{obs}}^2 =\sum_{i=1}^{I}\sum_{j=1}^J \frac{(n_{ij}-\hat{\mu}_{ij})^2}{\hat{\mu}_{ij}} \overset{\bullet}{\sim} \chi^2_{(I-1)(J-1)},$ where $\hat{\mu}_{ij}=\frac{n_{i\bullet}n_{\bullet j}}{n} = E_{ij}$ and $n_{ij} = O_{ij}$.  The null hypothesis of independence is rejected when $\chi_{\text{obs}}^2 > \chi^2_{1-\alpha; (I-1)(J-1)}$.
+
+The chi-squared approximation is generally satisfactory if the $E_{ij}$s ($\hat{\mu}_{ij}$s) in the test statistic are not too small.  Various rules of thumb exist for what might be considered too small.  A very conservative rule is to require all $E_{ij}$s to be 5 or more.  This can be accomplished by combining cells with small $E_{ij}$s and reducing the overall degrees of freedom.  At times, it may be permissible to let the $E_{ij}$ of a cell be as low as 0.5.
+
+_____________
+
+**Test For SCENARIO ONE:**
+
+**Hypotheses** ---  $H_0: \pi_{ij} = \pi_{i\bullet }\pi_{\bullet j}$ 
+        (Row and column variables are independent.)
+        versus $H_A: \pi_{ij} \ne \pi_{i\bullet }\pi_{\bullet j}$ for at least one $i, j$
+        (Row and column variables are dependent.)
+        
+**Test Statistic** --- The test statistic is
+        $$\chi_{\text{obs}}^2=\sum_{i=1}^I \sum_{j=1}^J 
+        \frac{(O_{ij}-E_{ij})^2}{E_{ij}} \overset{\bullet}{\sim} \chi^2_{(I-1)(J-1)}=
+        \chi^2_{(2-1)(3-1)}=\chi^2_2$$
+        under the assumption of independence. The $\chi^2_{\text{obs}}$ value is
+        $`r chisq.test(HAT)$stat`$. 
+        
+```{r}
+chisq.test(HAT)$stat
+```
+
+**Rejection Region Calculations** --- The rejection region is $$\chi_{\text{obs}}^2 > \chi^2_{1-\alpha; (I-1)(J-1)}=\chi^2_{0.95;2}= `r qchisq(0.95, 2)`.$$  Before the statistic $\chi^2_{\text{obs}}= \sum_{i=1}^I\sum_{j=1}^J \frac{(O_{ij} - E_{ij})^2}{E_{ij}}$ can be computed, the expected counts for each of the $ij$ cells must be calculated.  Note that $O_{ij}=n_{ij}$ and $E_{ij}=\frac{n_{i\bullet}n_{\bullet j}}{n}$.
+
+```{r}
+E <- chisq.test(HAT)$exp
+E
+```
+
+$$\chi^2_{\text{obs}}=\frac{(110 - 123.6280)^2}{123.6280} +
+\frac{(277-262.2)^2}{262.2}+ \dots +\frac{(63-61.828)^2}{61.828}=4.3215.$$
+
+The value of the test statistic is $\chi^2_{obs}= `r chisq.test(HAT)$stat`$.
+This can be done with code by entering
+
+```{r}
+chisq.test(HAT)$stat
+# Or
+chi_obs <- sum((HAT - E)^2/E)
+chi_obs
+```
+
+$`r chisq.test(HAT)$stat` = \chi^2_{\text{obs}} \overset{?}{>} \chi^2_{0.95,2}= `r qchisq(0.95, 2)`$.
+
+**Statistical Conclusion** --- The $p-$value is `r chisq.test(HAT)$p.value`
+
+```{r}
+chisq.test(HAT)
+chisq.test(HAT)$p.value
+# Or
+p_val <- pchisq(chi_obs, 2, lower = FALSE)
+p_val
+```
+
+I.   From the rejection region, since $\chi_{\text{obs}}^2=`r chi_obs` < \chi^2_{0.95;2}=`r qchisq(0.95, 2)`$. fail to reject the null hypothesis of independence.
+           
+II.   Since the $p-$value = $`r p_val`$ is greater than 0.05, fail to reject the null hypothesis of independence.
+       
+**Fail to reject $H_0$.**
+
+**English Conclusion** --- There is not sufficient evidence to suggest the variables gender and happiness are statistically dependent.
+
+_______________
+
+### EXAMPLE{-}
+
+Is there an association between eye color and hearing loss in patients suffering from meningitis?  British researcher [Helen Cullingham]() recorded the eye color of 130 deaf patients and noted whether the deafness had followed treatment for meningitis.
+
+```{r}
+HC <- c(30, 72, 2, 26)
+HCM <- matrix(HC, byrow = TRUE, nrow = 2)
+dimnames(HCM) <- list(Eye_Color = c("Light", "Dark"), Deafness_related_to = c("Meningitis", "Other"))
+HCM
+```
+
+```{r}
+#Your code to test the appropriate hypothesis
+
+chisq.test(HCM, correct = FALSE)
+```
+
+________________________ 
+
+**SCENARIO TWO:**  In a double blind randomized drug trial (neither the patient nor the physician evaluating the patient knows the treatment, drug or placebo, the patient receives), 400 male patients with mild dementia were randomly divided into two groups of 200.  One group was given a placebo over three months while the second group received an experimental drug for three months.  At the end of the three months, the physicians (all  psychiatrists) classified the 400 patients into one of three categories: improved, no change,  or worse.   The information below shows how the psychiatrists classified the patients.  Are the proportions in the three status categories the same for the two treatments?
+
+```{r}
+DT <- c(67, 76, 57, 48, 73, 79)
+DTT <- matrix(data = DT, nrow = 2, byrow = TRUE)
+dimnames(DTT) <- list(Treatment = c("Drug", "Placebo"),
+   Category = c("Improve", "No Change", "Worse"))
+DTT
+```
 
 

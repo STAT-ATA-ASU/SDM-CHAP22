@@ -166,7 +166,7 @@ pre code {
 
 <h1 class="title toc-ignore">Chapter 22</h1>
 <h4 class="author">Alan T. Arnholt - Modified notes from the Second Edition of <em>Probability and Statistics with R</em></h4>
-<h4 class="date">Last compiled: February 25, 2022 at 04:25:46 PM</h4>
+<h4 class="date">Last compiled: February 28, 2022 at 03:38:01 PM</h4>
 
 </div>
 
@@ -176,8 +176,8 @@ pre code {
 <p><strong>Objectives:</strong></p>
 <ol style="list-style-type: upper-roman">
 <li><p>Goodness of fit test</p></li>
-<li><p>Homogeneity test</p></li>
 <li><p>Independence test</p></li>
+<li><p>Homogeneity test</p></li>
 <li><p>What can go wrong?</p></li>
 </ol>
 <hr />
@@ -292,7 +292,7 @@ Figure 1.1: Histogram of observed goals for <code>SOCCER</code> with a superimpo
 sig &lt;- sd(GRADES$sat) 
 c(mu, sig)</code></pre>
 <pre><code>[1] 1134.6500  145.6087</code></pre>
-<p>Because a normal distribution is continuous, it is necessary to create categories that include all the data. The categories <span class="math inline">\(\mu - 3\sigma\)</span> to <span class="math inline">\(\mu -2\sigma, \dots, \mu +2\sigma\)</span> to <span class="math inline">\(\mu + 3\sigma\)</span> are 697.8239678 to 843.4326452, 843.4326452 to 989.0413226, 989.0413226 to 1134.65,
+<p>Because a normal distribution is continuous, it is necessary to create categories that include all the data. The categories <span class="math inline">\(\mu - 3\sigma\)</span> to <span class="math inline">\(\mu -2\sigma, \bullets, \mu +2\sigma\)</span> to <span class="math inline">\(\mu + 3\sigma\)</span> are 697.8239678 to 843.4326452, 843.4326452 to 989.0413226, 989.0413226 to 1134.65,
 1134.65 to
 1280.2586774, 1280.2586774 to 1425.8673548, and 1425.8673548 to 1571.4760322. These particular categories include all of the observed SAT scores; however, the probabilities actually computed for the largest and smallest categories will be all of the area to the right and left, respectively, of <span class="math inline">\(\bar{x} \pm 2s\)</span>. This is done so that the total area under the distribution in the null hypothesis is one.</p>
 <pre class="r"><code>bin &lt;- seq(from = mu - 3*sig, to = mu + 3*sig, by = sig)
@@ -387,8 +387,167 @@ p_val</code></pre>
 data:  OB
 X-squared = 62.538, df = 4, p-value = 8.487e-13</code></pre>
 <hr />
-<p>Hints for police vs. youth problem (#11): First, make sure the police percents add to 100%. Next, use the only sample size given times observed (police) and expected (youth) percents to get counts (OBS &amp; EXP, respectively). Finally, this is a test of goodness of fit.</p>
+<p>Given a contingency table (Question 5)</p>
+<pre class="r"><code>ad &lt;- c(20, 45, 35, 25, 50, 25)
+adm &lt;- matrix(ad, byrow = TRUE, nrow = 2)
+adm</code></pre>
+<pre><code>     [,1] [,2] [,3]
+[1,]   20   45   35
+[2,]   25   50   25</code></pre>
+<pre class="r"><code>dimnames(adm) &lt;- list(Branch = c(&quot;In-Town&quot;, &quot;Mall&quot;), Age = c(&quot;Less Than 30&quot;, &quot;30-55&quot;, &quot;56 or older&quot;))
+adm</code></pre>
+<pre><code>         Age
+Branch    Less Than 30 30-55 56 or older
+  In-Town           20    45          35
+  Mall              25    50          25</code></pre>
+<pre class="r"><code>chisq.test(adm)</code></pre>
+<pre><code>
+    Pearson&#39;s Chi-squared test
+
+data:  adm
+X-squared = 2.4854, df = 2, p-value = 0.2886</code></pre>
+<pre class="r"><code># To get the expected counts use $exp
+chisq.test(adm)$exp</code></pre>
+<pre><code>         Age
+Branch    Less Than 30 30-55 56 or older
+  In-Town         22.5  47.5          30
+  Mall            22.5  47.5          30</code></pre>
+<p>To get <strong>Standardized Residuals</strong> compute <span class="math inline">\(\frac{(\text{Obs - Exp})}{\sqrt{\text{Exp}}}\)</span>. If using the <code>chisq.test()</code> function one may extract the residuals using <code>$residuals</code></p>
+<pre class="r"><code>chisq.test(adm)$residuals</code></pre>
+<pre><code>         Age
+Branch    Less Than 30      30-55 56 or older
+  In-Town   -0.5270463 -0.3627381   0.9128709
+  Mall       0.5270463  0.3627381  -0.9128709</code></pre>
+<pre class="r"><code># Equivalent to
+(chisq.test(adm)$obs - chisq.test(adm)$exp)/chisq.test(adm)$exp^.5</code></pre>
+<pre><code>         Age
+Branch    Less Than 30      30-55 56 or older
+  In-Town   -0.5270463 -0.3627381   0.9128709
+  Mall       0.5270463  0.3627381  -0.9128709</code></pre>
+<p><strong>Questions 8</strong></p>
+<p>Given a ratio 9:3:3:1, the fraction for each category will be 9/16, 3/16, 3/16, 1/16.</p>
+<pre class="r"><code>obs &lt;- c(54, 21, 13, 12)
+obs2 &lt;- obs*2
+p &lt;- c(9/16, 3/16, 3/16, 1/16)
+chisq.test(x = obs, p = p)</code></pre>
+<pre><code>
+    Chi-squared test for given probabilities
+
+data:  obs
+X-squared = 7.4133, df = 3, p-value = 0.05983</code></pre>
+<pre class="r"><code>chisq.test(obs2, p = p)</code></pre>
+<pre><code>
+    Chi-squared test for given probabilities
+
+data:  obs2
+X-squared = 14.827, df = 3, p-value = 0.001971</code></pre>
 <hr />
+</div>
+</div>
+<div id="independence-test" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Independence test</h2>
+<p><strong>SCENARIO ONE:</strong> Is there an association between gender and a person’s happiness? To investigate whether happiness depends on gender, one might use information collected from the General Social Survey (GSS) <a href="http://sda.berkeley.edu/GSS">http://sda.berkeley.edu/GSS</a>. In each survey, the GSS asks, ``Taken all together, how would you say things are these days — would you say that you are very happy, pretty happy, or not too happy?’’ Respondents to each survey are coded as either male or female. The information below shows how a subset of respondents (26-year-olds) were classified with respect to the variables HAPPY and SEX.</p>
+<pre class="r"><code>HA &lt;- c(110, 277, 50, 163, 302, 63)
+HAT &lt;- matrix(data = HA, nrow = 2, byrow = TRUE)
+dimnames(HAT) &lt;- list(SEX = c(&quot;Male&quot;, &quot;Female&quot;),
+    Category = c(&quot;Very Happy&quot;, &quot;Pretty Happy&quot;, &quot;Not To Happy&quot;))
+HAT</code></pre>
+<pre><code>        Category
+SEX      Very Happy Pretty Happy Not To Happy
+  Male          110          277           50
+  Female        163          302           63</code></pre>
+<p>Scenario one asks if there is an association between gender and a person’s happiness. Two events, <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>, were defined as independent when <span class="math inline">\(P(A \cap B)=P(A)\times P(B)\)</span> or, equivalently, when <span class="math inline">\(P(A|B)=P(A)\)</span>. If, instead of having a random sample from a single population, an <span class="math inline">\(I \times J\)</span> contingency table consisted of entries from the population, association could be mathematically verified by showing that <span class="math inline">\(P(n_{ij}) \ne P(n_{i\bullet}) \times P(n_{\bullet j})\)</span> for some <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>. If by chance <span class="math inline">\(P(n_{ij}) = P(n_{i\bullet}) \times P(n_{\bullet j})\)</span> for all <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, then one would conclude there is no association between gender and a person’s happiness. That is, the variables gender and happiness would be considered mathematically independent. Since the entire population is not given but rather a sample from a population, the values in the <span class="math inline">\(I \times J\)</span> contingency table can be expected to change from sample to sample. The question is, ``By how much can the variables deviate from the mathematical definition of independence and still be considered statistically independent?’’</p>
+<p>The null and alternative hypotheses to test for independence between row and column variables is written <span class="math inline">\(H_0: \pi_{ij}=\pi_{i\bullet}\pi_{\bullet j}\)</span> versus <span class="math inline">\(H_A:\pi_{ij} \ne \pi_{i\bullet}\pi_{\bullet j}\)</span>. The test statistic is</p>
+<p><span class="math display" id="eq:ChiSqStatIndep">\[\begin{equation}
+\chi_{\text{obs}}^2 =\sum_{i=1}^I\sum_{j=1}^J \frac{(O_{ij} - E_{ij})^2}{E_{ij}}
+\tag{1.2}
+\end{equation}\]</span></p>
+<p>It compares the observed frequencies in the table with the expected frequencies when <span class="math inline">\(H_0\)</span> is true. Under the assumption of independence, and when the observations in the cells are sufficiently large (usually greater than 5), <span class="math inline">\(\chi_{\text{obs}}^2 =\sum_{i=1}^{I}\sum_{j=1}^J \frac{(n_{ij}-\hat{\mu}_{ij})^2}{\hat{\mu}_{ij}} \overset{\bullet}{\sim} \chi^2_{(I-1)(J-1)},\)</span> where <span class="math inline">\(\hat{\mu}_{ij}=\frac{n_{i\bullet}n_{\bullet j}}{n} = E_{ij}\)</span> and <span class="math inline">\(n_{ij} = O_{ij}\)</span>. The null hypothesis of independence is rejected when <span class="math inline">\(\chi_{\text{obs}}^2 &gt; \chi^2_{1-\alpha; (I-1)(J-1)}\)</span>.</p>
+<p>The chi-squared approximation is generally satisfactory if the <span class="math inline">\(E_{ij}\)</span>s (<span class="math inline">\(\hat{\mu}_{ij}\)</span>s) in the test statistic are not too small. Various rules of thumb exist for what might be considered too small. A very conservative rule is to require all <span class="math inline">\(E_{ij}\)</span>s to be 5 or more. This can be accomplished by combining cells with small <span class="math inline">\(E_{ij}\)</span>s and reducing the overall degrees of freedom. At times, it may be permissible to let the <span class="math inline">\(E_{ij}\)</span> of a cell be as low as 0.5.</p>
+<hr />
+<p><strong>Test For SCENARIO ONE:</strong></p>
+<p><strong>Hypotheses</strong> — <span class="math inline">\(H_0: \pi_{ij} = \pi_{i\bullet }\pi_{\bullet j}\)</span>
+(Row and column variables are independent.)
+versus <span class="math inline">\(H_A: \pi_{ij} \ne \pi_{i\bullet }\pi_{\bullet j}\)</span> for at least one <span class="math inline">\(i, j\)</span>
+(Row and column variables are dependent.)</p>
+<p><strong>Test Statistic</strong> — The test statistic is
+<span class="math display">\[\chi_{\text{obs}}^2=\sum_{i=1}^I \sum_{j=1}^J 
+        \frac{(O_{ij}-E_{ij})^2}{E_{ij}} \overset{\bullet}{\sim} \chi^2_{(I-1)(J-1)}=
+        \chi^2_{(2-1)(3-1)}=\chi^2_2\]</span>
+under the assumption of independence. The <span class="math inline">\(\chi^2_{\text{obs}}\)</span> value is
+<span class="math inline">\(4.3214818\)</span>.</p>
+<pre class="r"><code>chisq.test(HAT)$stat</code></pre>
+<pre><code>X-squared 
+ 4.321482 </code></pre>
+<p><strong>Rejection Region Calculations</strong> — The rejection region is <span class="math display">\[\chi_{\text{obs}}^2 &gt; \chi^2_{1-\alpha; (I-1)(J-1)}=\chi^2_{0.95;2}= 5.9914645.\]</span> Before the statistic <span class="math inline">\(\chi^2_{\text{obs}}= \sum_{i=1}^I\sum_{j=1}^J \frac{(O_{ij} - E_{ij})^2}{E_{ij}}\)</span> can be computed, the expected counts for each of the <span class="math inline">\(ij\)</span> cells must be calculated. Note that <span class="math inline">\(O_{ij}=n_{ij}\)</span> and <span class="math inline">\(E_{ij}=\frac{n_{i\bullet}n_{\bullet j}}{n}\)</span>.</p>
+<pre class="r"><code>E &lt;- chisq.test(HAT)$exp
+E</code></pre>
+<pre><code>        Category
+SEX      Very Happy Pretty Happy Not To Happy
+  Male      123.628        262.2     51.17202
+  Female    149.372        316.8     61.82798</code></pre>
+<p><span class="math display">\[\chi^2_{\text{obs}}=\frac{(110 - 123.6280)^2}{123.6280} +
+\frac{(277-262.2)^2}{262.2}+ \dots +\frac{(63-61.828)^2}{61.828}=4.3215.\]</span></p>
+<p>The value of the test statistic is <span class="math inline">\(\chi^2_{obs}= 4.3214818\)</span>.
+This can be done with code by entering</p>
+<pre class="r"><code>chisq.test(HAT)$stat</code></pre>
+<pre><code>X-squared 
+ 4.321482 </code></pre>
+<pre class="r"><code># Or
+chi_obs &lt;- sum((HAT - E)^2/E)
+chi_obs</code></pre>
+<pre><code>[1] 4.321482</code></pre>
+<p><span class="math inline">\(4.3214818 = \chi^2_{\text{obs}} \overset{?}{&gt;} \chi^2_{0.95,2}= 5.9914645\)</span>.</p>
+<p><strong>Statistical Conclusion</strong> — The <span class="math inline">\(p-\)</span>value is 0.1152397</p>
+<pre class="r"><code>chisq.test(HAT)</code></pre>
+<pre><code>
+    Pearson&#39;s Chi-squared test
+
+data:  HAT
+X-squared = 4.3215, df = 2, p-value = 0.1152</code></pre>
+<pre class="r"><code>chisq.test(HAT)$p.value</code></pre>
+<pre><code>[1] 0.1152397</code></pre>
+<pre class="r"><code># Or
+p_val &lt;- pchisq(chi_obs, 2, lower = FALSE)
+p_val</code></pre>
+<pre><code>[1] 0.1152397</code></pre>
+<ol style="list-style-type: upper-roman">
+<li><p>From the rejection region, since <span class="math inline">\(\chi_{\text{obs}}^2=4.3214818 &lt; \chi^2_{0.95;2}=5.9914645\)</span>. fail to reject the null hypothesis of independence.</p></li>
+<li><p>Since the <span class="math inline">\(p-\)</span>value = <span class="math inline">\(0.1152397\)</span> is greater than 0.05, fail to reject the null hypothesis of independence.</p></li>
+</ol>
+<p><strong>Fail to reject <span class="math inline">\(H_0\)</span>.</strong></p>
+<p><strong>English Conclusion</strong> — There is not sufficient evidence to suggest the variables gender and happiness are statistically dependent.</p>
+<hr />
+<div id="example-2" class="section level3 unnumbered">
+<h3>EXAMPLE</h3>
+<p>Is there an association between eye color and hearing loss in patients suffering from meningitis? British researcher <a href>Helen Cullingham</a> recorded the eye color of 130 deaf patients and noted whether the deafness had followed treatment for meningitis.</p>
+<pre class="r"><code>HC &lt;- c(30, 72, 2, 26)
+HCM &lt;- matrix(HC, byrow = TRUE, nrow = 2)
+dimnames(HCM) &lt;- list(Eye_Color = c(&quot;Light&quot;, &quot;Dark&quot;), Deafness_related_to = c(&quot;Meningitis&quot;, &quot;Other&quot;))
+HCM</code></pre>
+<pre><code>         Deafness_related_to
+Eye_Color Meningitis Other
+    Light         30    72
+    Dark           2    26</code></pre>
+<pre class="r"><code>#Your code to test the appropriate hypothesis
+
+chisq.test(HCM, correct = FALSE)</code></pre>
+<pre><code>
+    Pearson&#39;s Chi-squared test
+
+data:  HCM
+X-squared = 5.8712, df = 1, p-value = 0.01539</code></pre>
+<hr />
+<p><strong>SCENARIO TWO:</strong> In a double blind randomized drug trial (neither the patient nor the physician evaluating the patient knows the treatment, drug or placebo, the patient receives), 400 male patients with mild dementia were randomly divided into two groups of 200. One group was given a placebo over three months while the second group received an experimental drug for three months. At the end of the three months, the physicians (all psychiatrists) classified the 400 patients into one of three categories: improved, no change, or worse. The information below shows how the psychiatrists classified the patients. Are the proportions in the three status categories the same for the two treatments?</p>
+<pre class="r"><code>DT &lt;- c(67, 76, 57, 48, 73, 79)
+DTT &lt;- matrix(data = DT, nrow = 2, byrow = TRUE)
+dimnames(DTT) &lt;- list(Treatment = c(&quot;Drug&quot;, &quot;Placebo&quot;),
+   Category = c(&quot;Improve&quot;, &quot;No Change&quot;, &quot;Worse&quot;))
+DTT</code></pre>
+<pre><code>         Category
+Treatment Improve No Change Worse
+  Drug         67        76    57
+  Placebo      48        73    79</code></pre>
 </div>
 </div>
 </div>
