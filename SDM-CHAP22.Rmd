@@ -496,7 +496,7 @@ TVM
 
 ```
 
-Do the boys' preferences for these TV programs differ significantly from the girls' preferences?  Use $\alpha 0.05$ to test your hypotheses.
+Do the boys' preferences for these TV programs differ significantly from the girls' preferences?  Use $\alpha= 0.05$ to test your hypotheses.
 
 ```{r}
 chisq.test(TVM)
