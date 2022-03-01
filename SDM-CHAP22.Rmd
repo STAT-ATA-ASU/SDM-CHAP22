@@ -406,4 +406,109 @@ dimnames(DTT) <- list(Treatment = c("Drug", "Placebo"),
 DTT
 ```
 
+In the **second scenario**, there are two distinct populations from which samples are taken.  The first population is the group of all patients receiving the experimental drug while the second population is the group of all patients receiving a placebo.  In this scenario, there are $I=2$ separate populations and $J=3$ categories for the $I=2$ populations.  Individuals sampled from the $I=2$ distinct populations are classified into one of the $J=3$ status categories.  This scenario has fixed row totals whereas the **first scenario** does not.  In the first scenario, only the total sample size, $n$, is fixed.  That is, neither the row nor the column totals are fixed.  This is in contrast to **scenario two**, where the number of patients in each treatment group (row) was fixed.
 
+## Test of Homogeneity
+
+The question of interest in **scenario two** is whether the proportions in each of the $j=3$ categories for the $i=2$ populations are equivalent.  Specifically, is $\pi_{1j} = \pi_{2j}$ for all $j$?  This question is answered with a test of homogeneity.  In general, the null hypothesis for a test of homogeneity with $i=I$ populations is written
+
+\begin{equation}
+ H_0: \pi_{1j}=\pi_{2j} = \dots = \pi_{Ij}\text{ for all } j \text{ versus } H_1:
+\pi_{ij} \ne \pi_{i+1, j} \: \text{ for some } (i, j).
+\end{equation}
+
+Expressed in words, the null hypothesis is that the $I$ populations are
+homogeneous with respect to the $J$ categories versus the $I$ populations are not homogeneous with respect to the $J$ categories.
+
+An equivalent interpretation is that for each population $i=1,2,\dots, I$, the proportion of people in the $j\text{th}$ category is the same.  When $H_0$ is true, $\pi_{1j}=\pi_{2j}=\dots=\pi_{Ij}$ for all $j$.  Under the null hypothesis, $\mu_{ij}= n_{i\bullet} \pi_{ij}$, $\hat\pi_{ij}=p_{ij}= \frac{n_{\bullet j}}{n_{\bullet\bullet}}$, and $\hat{\mu}_{ij}= \frac{n_{i\bullet} n_{\bullet j}}{n_{\bullet\bullet}}=E_{ij}$.   When $H_0$ is true, all the probabilities in the $j$\text{th} column are equal, and a pooled estimate of $\pi_{ij}$ is obtained by adding all the frequencies in the $j$\text{th} column $(n_{\bullet j})$ and dividing the total by $n_{\bullet\bullet}$.  The statistic used in this type of problem  has the same form as the one used for the test of independence in \@ref(eq:ChiSqStatIndep).  Substituting the homogeneity expressions for $O_{ij}$ and $E_{ij}$, the  statistic is expressed as
+
+$$\chi_{\text{obs}}^2=\sum_{i=1}^I\sum_{j=1}^J \frac{(n_{ij} - n_{i\bullet} n_{\bullet
+j}/n_{\bullet\bullet})^2}{n_{i\bullet} n_{\bullet j}/n_{\bullet\bullet}} \overset{\cdot}{\sim}
+\chi^2_{(I-1)(J-1)}.$$ The null hypothesis of homogeneity is rejected when
+$\chi_{\text{obs}}^2 > \chi^2_{1-\alpha; (I-1)(J-1)}$. 
+
+____________
+
+**Test for SCENARIO TWO:**
+
+**Hypotheses**--- $H_0: \pi_{1j}=\pi_{2j} \text{ for all } j$ versus $H_A: \pi_{i,\, j} \ne \pi_{i+1,\, j}\text{ for some }(i, j)$. That is, all the probabilities in the same column are equal to each other versus at least two of the probabilities in the same column are not equal to each other.
+        
+**Test Statistic**---The test statistic is
+        $$\chi_{\text{obs}}^2=\sum_{i=1}^I \sum_{j=1}^J 
+        \frac{(O_{ij}-E_{ij})^2}{E_{ij}} \sim \chi^2_{(I-1)(J-1)}=
+        \chi^2_{(2-1)(3-1)}=\chi^2_2$$
+under the null hypothesis. The $\chi^2_{\text{obs}}$ value is
+        $`r chisq.test(DTT)$stat`$.
+        
+**Rejection Region Calculations**---The rejection region is
+        $$\chi_{\text{obs}}^2 > \chi^2_{1-\alpha; (I-1)\cdot(J-1)} = 
+        \chi^2_{0.95;2}=`r qchisq(0.95, 2)`.$$  
+        Before the statistic $\chi^2_{\text{obs}}= \sum_{i=1}^I\sum_{j=1}^J \frac{(O_{ij} - E_{ij})^2}{E_{ij}}$ can be computed, the expected counts for each of the $ij$ cells must be determined.  Recall that $O_{ij}=n_{ij}$ and $E_{ij}=\frac{n_{i\bullet}n_{\bullet j}}{n_{\bullet\bullet}}.$
+        
+```{r}
+DTT
+E <- chisq.test(DTT)$expected
+E
+```
+
+$$\chi^2_{\text{obs}}=\frac{(67 - 57.5)^2}{57.5} + \frac{(76 - 74.5)^2}{74.5}+
+\dots +\frac{(79-68)^2}{68}=`r chisq.test(DTT)$stat`.$$
+
+The value of the test statistic is $\chi^2_{obs}=`r chisq.test(DTT)$stat`.$  This can be done with code by entering
+
+```{r}
+chisq.test(DTT)
+chisq.test(DTT)$stat
+# Or 
+chi_obs <- sum((DTT - E)^2/E)
+chi_obs
+```
+
+$`r chisq.test(DTT)$stat` = \chi^2_{\text{obs}}\overset{?}{>} \chi^2_{.95,2}= `r qchisq(0.95, 2)`.$
+
+**Statistical Conclusion**---The $p-$value is $`r chisq.test(DTT)$p.value`.$
+
+```{r}
+p_val <- pchisq(chi_obs, 2, lower = FALSE)
+p_val
+```
+
+I.  From the rejection region, since $\chi_{\text{obs}}^2= `r chi_obs` > \chi_{0.95;2} = `r qchisq(0.95, 2)`$, reject the null hypothesis of homogeneity.
+
+II.  Since the $p-$value = $`r p_val`$ is less than 0.05, 
+            reject the null hypothesis of homogeneity.
+
+**Reject $H_0$.**
+
+**English Conclusion**---There is sufficient evidence to suggest that not all of the probabilities for the $i=2$ populations with respect to each of the $J$ categories are equal.
+
+____________
+
+## Example{-}
+
+In a study of the television viewing havits of children, a developmental psychologist selects two random samples of first graders: one with 100 boys and one with 200 girls.  Each child is asked which of the following TV programs the like best: The Lone Ranger, Sesame Street, or The Simpsons.  Results are shown below.
+
+```{r}
+TV <- c(50, 30, 20, 50, 80, 70)
+TVM <- matrix(data = TV, nrow = 2, byrow = TRUE)
+dimnames(TVM) <- list(FirstGraders = c("Boys", "Girls"), ViewingPreference = c("Lone Ranger", "Sesame Street", "The Simpsons"))
+TVM
+
+```
+
+Do the boys' preferences for these TV programs differ significantly from the girls' preferences?  Use $\alpha 0.05$ to test your hypotheses.
+
+```{r}
+chisq.test(TVM)
+```
+**Your English Conclusion**
+
+______________
+
+### What can go wrong?{-}
+
+1. $\chi^2$ tests are **only** for counts
+2. Samples reasonably sized
+3. Note that "not independent" $\neq$ dependent, only association exists
+
+_______________

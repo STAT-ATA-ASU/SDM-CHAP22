@@ -166,7 +166,7 @@ pre code {
 
 <h1 class="title toc-ignore">Chapter 22</h1>
 <h4 class="author">Alan T. Arnholt - Modified notes from the Second Edition of <em>Probability and Statistics with R</em></h4>
-<h4 class="date">Last compiled: February 28, 2022 at 03:38:01 PM</h4>
+<h4 class="date">Last compiled: March 01, 2022 at 10:00:25 AM</h4>
 
 </div>
 
@@ -548,6 +548,105 @@ DTT</code></pre>
 Treatment Improve No Change Worse
   Drug         67        76    57
   Placebo      48        73    79</code></pre>
+<p>In the <strong>second scenario</strong>, there are two distinct populations from which samples are taken. The first population is the group of all patients receiving the experimental drug while the second population is the group of all patients receiving a placebo. In this scenario, there are <span class="math inline">\(I=2\)</span> separate populations and <span class="math inline">\(J=3\)</span> categories for the <span class="math inline">\(I=2\)</span> populations. Individuals sampled from the <span class="math inline">\(I=2\)</span> distinct populations are classified into one of the <span class="math inline">\(J=3\)</span> status categories. This scenario has fixed row totals whereas the <strong>first scenario</strong> does not. In the first scenario, only the total sample size, <span class="math inline">\(n\)</span>, is fixed. That is, neither the row nor the column totals are fixed. This is in contrast to <strong>scenario two</strong>, where the number of patients in each treatment group (row) was fixed.</p>
+</div>
+</div>
+<div id="test-of-homogeneity" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> Test of Homogeneity</h2>
+<p>The question of interest in <strong>scenario two</strong> is whether the proportions in each of the <span class="math inline">\(j=3\)</span> categories for the <span class="math inline">\(i=2\)</span> populations are equivalent. Specifically, is <span class="math inline">\(\pi_{1j} = \pi_{2j}\)</span> for all <span class="math inline">\(j\)</span>? This question is answered with a test of homogeneity. In general, the null hypothesis for a test of homogeneity with <span class="math inline">\(i=I\)</span> populations is written</p>
+<p><span class="math display">\[\begin{equation}
+ H_0: \pi_{1j}=\pi_{2j} = \dots = \pi_{Ij}\text{ for all } j \text{ versus } H_1:
+\pi_{ij} \ne \pi_{i+1, j} \: \text{ for some } (i, j).
+\end{equation}\]</span></p>
+<p>Expressed in words, the null hypothesis is that the <span class="math inline">\(I\)</span> populations are
+homogeneous with respect to the <span class="math inline">\(J\)</span> categories versus the <span class="math inline">\(I\)</span> populations are not homogeneous with respect to the <span class="math inline">\(J\)</span> categories.</p>
+<p>An equivalent interpretation is that for each population <span class="math inline">\(i=1,2,\dots, I\)</span>, the proportion of people in the <span class="math inline">\(j\text{th}\)</span> category is the same. When <span class="math inline">\(H_0\)</span> is true, <span class="math inline">\(\pi_{1j}=\pi_{2j}=\dots=\pi_{Ij}\)</span> for all <span class="math inline">\(j\)</span>. Under the null hypothesis, <span class="math inline">\(\mu_{ij}= n_{i\bullet} \pi_{ij}\)</span>, <span class="math inline">\(\hat\pi_{ij}=p_{ij}= \frac{n_{\bullet j}}{n_{\bullet\bullet}}\)</span>, and <span class="math inline">\(\hat{\mu}_{ij}= \frac{n_{i\bullet} n_{\bullet j}}{n_{\bullet\bullet}}=E_{ij}\)</span>. When <span class="math inline">\(H_0\)</span> is true, all the probabilities in the <span class="math inline">\(j\)</span> column are equal, and a pooled estimate of <span class="math inline">\(\pi_{ij}\)</span> is obtained by adding all the frequencies in the <span class="math inline">\(j\)</span> column <span class="math inline">\((n_{\bullet j})\)</span> and dividing the total by <span class="math inline">\(n_{\bullet\bullet}\)</span>. The statistic used in this type of problem has the same form as the one used for the test of independence in <a href="#eq:ChiSqStatIndep">(1.2)</a>. Substituting the homogeneity expressions for <span class="math inline">\(O_{ij}\)</span> and <span class="math inline">\(E_{ij}\)</span>, the statistic is expressed as</p>
+<p><span class="math display">\[\chi_{\text{obs}}^2=\sum_{i=1}^I\sum_{j=1}^J \frac{(n_{ij} - n_{i\bullet} n_{\bullet
+j}/n_{\bullet\bullet})^2}{n_{i\bullet} n_{\bullet j}/n_{\bullet\bullet}} \overset{\cdot}{\sim}
+\chi^2_{(I-1)(J-1)}.\]</span> The null hypothesis of homogeneity is rejected when
+<span class="math inline">\(\chi_{\text{obs}}^2 &gt; \chi^2_{1-\alpha; (I-1)(J-1)}\)</span>.</p>
+<hr />
+<p><strong>Test for SCENARIO TWO:</strong></p>
+<p><strong>Hypotheses</strong>— <span class="math inline">\(H_0: \pi_{1j}=\pi_{2j} \text{ for all } j\)</span> versus <span class="math inline">\(H_A: \pi_{i,\, j} \ne \pi_{i+1,\, j}\text{ for some }(i, j)\)</span>. That is, all the probabilities in the same column are equal to each other versus at least two of the probabilities in the same column are not equal to each other.</p>
+<p><strong>Test Statistic</strong>—The test statistic is
+<span class="math display">\[\chi_{\text{obs}}^2=\sum_{i=1}^I \sum_{j=1}^J 
+        \frac{(O_{ij}-E_{ij})^2}{E_{ij}} \sim \chi^2_{(I-1)(J-1)}=
+        \chi^2_{(2-1)(3-1)}=\chi^2_2\]</span>
+under the null hypothesis. The <span class="math inline">\(\chi^2_{\text{obs}}\)</span> value is
+<span class="math inline">\(6.7583566\)</span>.</p>
+<p><strong>Rejection Region Calculations</strong>—The rejection region is
+<span class="math display">\[\chi_{\text{obs}}^2 &gt; \chi^2_{1-\alpha; (I-1)\cdot(J-1)} = 
+        \chi^2_{0.95;2}=5.9914645.\]</span><br />
+Before the statistic <span class="math inline">\(\chi^2_{\text{obs}}= \sum_{i=1}^I\sum_{j=1}^J \frac{(O_{ij} - E_{ij})^2}{E_{ij}}\)</span> can be computed, the expected counts for each of the <span class="math inline">\(ij\)</span> cells must be determined. Recall that <span class="math inline">\(O_{ij}=n_{ij}\)</span> and <span class="math inline">\(E_{ij}=\frac{n_{i\bullet}n_{\bullet j}}{n_{\bullet\bullet}}.\)</span></p>
+<pre class="r"><code>DTT</code></pre>
+<pre><code>         Category
+Treatment Improve No Change Worse
+  Drug         67        76    57
+  Placebo      48        73    79</code></pre>
+<pre class="r"><code>E &lt;- chisq.test(DTT)$expected
+E</code></pre>
+<pre><code>         Category
+Treatment Improve No Change Worse
+  Drug       57.5      74.5    68
+  Placebo    57.5      74.5    68</code></pre>
+<p><span class="math display">\[\chi^2_{\text{obs}}=\frac{(67 - 57.5)^2}{57.5} + \frac{(76 - 74.5)^2}{74.5}+
+\dots +\frac{(79-68)^2}{68}=6.7583566.\]</span></p>
+<p>The value of the test statistic is <span class="math inline">\(\chi^2_{obs}=6.7583566.\)</span> This can be done with code by entering</p>
+<pre class="r"><code>chisq.test(DTT)</code></pre>
+<pre><code>
+    Pearson&#39;s Chi-squared test
+
+data:  DTT
+X-squared = 6.7584, df = 2, p-value = 0.03408</code></pre>
+<pre class="r"><code>chisq.test(DTT)$stat</code></pre>
+<pre><code>X-squared 
+ 6.758357 </code></pre>
+<pre class="r"><code># Or 
+chi_obs &lt;- sum((DTT - E)^2/E)
+chi_obs</code></pre>
+<pre><code>[1] 6.758357</code></pre>
+<p><span class="math inline">\(6.7583566 = \chi^2_{\text{obs}}\overset{?}{&gt;} \chi^2_{.95,2}= 5.9914645.\)</span></p>
+<p><strong>Statistical Conclusion</strong>—The <span class="math inline">\(p-\)</span>value is <span class="math inline">\(0.0340754.\)</span></p>
+<pre class="r"><code>p_val &lt;- pchisq(chi_obs, 2, lower = FALSE)
+p_val</code></pre>
+<pre><code>[1] 0.03407544</code></pre>
+<ol style="list-style-type: upper-roman">
+<li><p>From the rejection region, since <span class="math inline">\(\chi_{\text{obs}}^2= 6.7583566 &gt; \chi_{0.95;2} = 5.9914645\)</span>, reject the null hypothesis of homogeneity.</p></li>
+<li><p>Since the <span class="math inline">\(p-\)</span>value = <span class="math inline">\(0.0340754\)</span> is less than 0.05,
+reject the null hypothesis of homogeneity.</p></li>
+</ol>
+<p><strong>Reject <span class="math inline">\(H_0\)</span>.</strong></p>
+<p><strong>English Conclusion</strong>—There is sufficient evidence to suggest that not all of the probabilities for the <span class="math inline">\(i=2\)</span> populations with respect to each of the <span class="math inline">\(J\)</span> categories are equal.</p>
+<hr />
+</div>
+<div id="example-3" class="section level2 unnumbered">
+<h2>Example</h2>
+<p>In a study of the television viewing havits of children, a developmental psychologist selects two random samples of first graders: one with 100 boys and one with 200 girls. Each child is asked which of the following TV programs the like best: The Lone Ranger, Sesame Street, or The Simpsons. Results are shown below.</p>
+<pre class="r"><code>TV &lt;- c(50, 30, 20, 50, 80, 70)
+TVM &lt;- matrix(data = TV, nrow = 2, byrow = TRUE)
+dimnames(TVM) &lt;- list(FirstGraders = c(&quot;Boys&quot;, &quot;Girls&quot;), ViewingPreference = c(&quot;Lone Ranger&quot;, &quot;Sesame Street&quot;, &quot;The Simpsons&quot;))
+TVM</code></pre>
+<pre><code>            ViewingPreference
+FirstGraders Lone Ranger Sesame Street The Simpsons
+       Boys           50            30           20
+       Girls          50            80           70</code></pre>
+<p>Do the boys’ preferences for these TV programs differ significantly from the girls’ preferences? Use <span class="math inline">\(\alpha 0.05\)</span> to test your hypotheses.</p>
+<pre class="r"><code>chisq.test(TVM)</code></pre>
+<pre><code>
+    Pearson&#39;s Chi-squared test
+
+data:  TVM
+X-squared = 19.318, df = 2, p-value = 6.384e-05</code></pre>
+<p><strong>Your English Conclusion</strong></p>
+<hr />
+<div id="what-can-go-wrong" class="section level3 unnumbered">
+<h3>What can go wrong?</h3>
+<ol style="list-style-type: decimal">
+<li><span class="math inline">\(\chi^2\)</span> tests are <strong>only</strong> for counts</li>
+<li>Samples reasonably sized</li>
+<li>Note that “not independent” <span class="math inline">\(\neq\)</span> dependent, only association exists</li>
+</ol>
+<hr />
 </div>
 </div>
 </div>
