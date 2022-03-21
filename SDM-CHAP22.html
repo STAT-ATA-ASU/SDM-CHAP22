@@ -61,6 +61,7 @@ if (window.hljs) {
 
 
 
+
 <style type="text/css">
 .main-container {
   max-width: 940px;
@@ -81,6 +82,9 @@ button.code-folding-btn:focus {
 }
 summary {
   display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
 }
 pre code {
   padding: 0;
@@ -166,7 +170,7 @@ pre code {
 
 <h1 class="title toc-ignore">Chapter 22</h1>
 <h4 class="author">Alan T. Arnholt - Modified notes from the Second Edition of <em>Probability and Statistics with R</em></h4>
-<h4 class="date">Last compiled: March 01, 2022 at 10:30:10 AM</h4>
+<h4 class="date">Last compiled: March 20, 2022 at 10:39:49 PM</h4>
 
 </div>
 
@@ -292,7 +296,7 @@ Figure 1.1: Histogram of observed goals for <code>SOCCER</code> with a superimpo
 sig &lt;- sd(GRADES$sat) 
 c(mu, sig)</code></pre>
 <pre><code>[1] 1134.6500  145.6087</code></pre>
-<p>Because a normal distribution is continuous, it is necessary to create categories that include all the data. The categories <span class="math inline">\(\mu - 3\sigma\)</span> to <span class="math inline">\(\mu -2\sigma, \bullets, \mu +2\sigma\)</span> to <span class="math inline">\(\mu + 3\sigma\)</span> are 697.8239678 to 843.4326452, 843.4326452 to 989.0413226, 989.0413226 to 1134.65,
+<p>Because a normal distribution is continuous, it is necessary to create categories that include all the data. The categories <span class="math inline">\(\mu - 3\sigma\)</span> to <span class="math inline">\(\mu -2\sigma, \ldots, \mu +2\sigma\)</span> to <span class="math inline">\(\mu + 3\sigma\)</span> are 697.8239678 to 843.4326452, 843.4326452 to 989.0413226, 989.0413226 to 1134.65,
 1134.65 to
 1280.2586774, 1280.2586774 to 1425.8673548, and 1425.8673548 to 1571.4760322. These particular categories include all of the observed SAT scores; however, the probabilities actually computed for the largest and smallest categories will be all of the area to the right and left, respectively, of <span class="math inline">\(\bar{x} \pm 2s\)</span>. This is done so that the total area under the distribution in the null hypothesis is one.</p>
 <pre class="r"><code>bin &lt;- seq(from = mu - 3*sig, to = mu + 3*sig, by = sig)

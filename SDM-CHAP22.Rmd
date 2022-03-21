@@ -159,7 +159,7 @@ sig <- sd(GRADES$sat)
 c(mu, sig)
 ```
         
-Because a normal distribution is continuous, it is necessary to create categories that include all the data.  The categories $\mu - 3\sigma$  to $\mu -2\sigma, \bullets, \mu +2\sigma$  to $\mu + 3\sigma$ are `r mu - 3*sig` to `r mu - 2*sig`, `r mu - 2*sig` to  `r mu - 1*sig`, `r mu - 1*sig` to `r mu`, 
+Because a normal distribution is continuous, it is necessary to create categories that include all the data.  The categories $\mu - 3\sigma$  to $\mu -2\sigma, \ldots, \mu +2\sigma$  to $\mu + 3\sigma$ are `r mu - 3*sig` to `r mu - 2*sig`, `r mu - 2*sig` to  `r mu - 1*sig`, `r mu - 1*sig` to `r mu`, 
 `r mu` to
 `r mu + sig`, `r mu + sig` to `r mu + 2*sig`, and `r mu + 2*sig` to `r mu + 3*sig`.   These particular categories include all of the observed SAT scores;  however, the probabilities actually computed for the largest and smallest categories will be all of the area to the right and left, respectively, of $\bar{x} \pm 2s$.  This is done so that the total area under the distribution in the null hypothesis is one.
 
