@@ -2,7 +2,9 @@
 title: "Chapter 22"
 author: "Alan T. Arnholt - Modified notes from the Second Edition of _Probability and Statistics with R_"
 date: 'Last compiled: `r format(Sys.time(), "%B %d, %Y at %X")`'
-output: bookdown::html_document2
+output: 
+  bookdown::html_document2:
+    keep_tex: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -211,7 +213,7 @@ below.
 chisq.test(x = OB, p = PR)  # returns incorrect dof and p-value
 ```
 
-Since it is not feasible to produce a histogram that extends from $-\infty$ to $\infty$, a histogram is created where the categories will simply cover the range of observed values.\IE{hist}  In this problem, the range of the SAT scores is `r range(GRADES$sat)[1]` to `r range(GRADES$sat)[2]`.  The histogram with categories $(\mu-3\sigma, \mu-2\sigma]$, $(\mu-2\sigma, \mu-\sigma]$, $(\mu-\sigma, \mu]$, $(\mu+, \mu+\sigma]$,  $(\mu+\sigma, \mu+2\sigma]$, and $(\mu+2\sigma, \mu+3\sigma]$, superimposed with the expected number of SAT scores for the categories $(-\infty, \mu-2\sigma]$, $(\mu-2\sigma, \mu-\sigma]$, $(\mu-\sigma, \mu]$, $(\mu, \mu+\sigma]$, $(\mu+\sigma, \mu+2\sigma]$, and $(\mu+2\sigma, \infty]$ is computed below and depicted in Figure \@ref(fig:normsat).
+Since it is not feasible to produce a histogram that extends from $-\infty$ to $\infty$, a histogram is created where the categories will simply cover the range of observed values.  In this problem, the range of the SAT scores is `r range(GRADES$sat)[1]` to `r range(GRADES$sat)[2]`.  The histogram with categories $(\mu-3\sigma, \mu-2\sigma]$, $(\mu-2\sigma, \mu-\sigma]$, $(\mu-\sigma, \mu]$, $(\mu+, \mu+\sigma]$,  $(\mu+\sigma, \mu+2\sigma]$, and $(\mu+2\sigma, \mu+3\sigma]$, superimposed with the expected number of SAT scores for the categories $(-\infty, \mu-2\sigma]$, $(\mu-2\sigma, \mu-\sigma]$, $(\mu-\sigma, \mu]$, $(\mu, \mu+\sigma]$, $(\mu+\sigma, \mu+2\sigma]$, and $(\mu+2\sigma, \infty]$ is computed below and depicted in Figure \@ref(fig:normsat).
 
 ```{r, label = "normsat", fig.cap = "Histogram of SAT scores in `Grades`"}
 hist(GRADES$sat, breaks = bin, col = "lightblue", 
